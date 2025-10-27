@@ -194,6 +194,14 @@ By completing this assignment, you will:
 - **Flask API Endpoints (10 points)**: Both endpoints return proper JSON responses  
 - **Frontend Integration (5 points)**: Web interface successfully calls APIs and displays results
 
-**Total: 50 points**
-
-Good luck! This assignment prepares you for the main Shannon Information Theory assignment where you'll implement n-gram models and text generation using similar preprocessing techniques.
+##  📸 Screenshots of Outputs
+- Python test_setup 
+<img width="1249" height="436" alt="image" src="https://github.com/user-attachments/assets/474a4988-89da-4062-98e2-07f8d5af75ff" />
+- pip install -r requirements.txt satisfied
+  <img width="1246" height="304" alt="image" src="https://github.com/user-attachments/assets/18bc109f-31e0-49ab-a285-4ff960f7f7e8" />
+- python app.py
+  <img width="1566" height="467" alt="image" src="https://github.com/user-attachments/assets/94851305-02f1-43c3-9f48-f362436b684a" />
+- Browser image
+    <img width="1911" height="1510" alt="image" src="https://github.com/user-attachments/assets/c55ac4ea-10db-464c-a6a6-4d3d61abe029" />
+- Clean and Analyzed output image
+  <img width="1916" height="1399" alt="image" src="https://github.com/user-attachments/assets/65773da5-0228-46cb-9a63-434c4412b974" />
