@@ -1,31 +1,183 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Gutenberg Text Cleaner</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📚 Gutenberg Text Analyzer</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Theme -->
+  <style>
+    body {
+      background: linear-gradient(135deg, #a5b4fc, #f9a8d4);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
+      transition: background 0.5s ease;
+    }
+    .dark-mode {
+      background: linear-gradient(135deg, #111827, #1e3a8a);
+      color: #f9fafb;
+    }
+    .card {
+      backdrop-filter: blur(10px);
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+    .dark-mode .card {
+      background-color: rgba(31, 41, 55, 0.85);
+    }
+    .btn-animate {
+      transition: all 0.3s ease;
+    }
+    .btn-animate:hover {
+      transform: scale(1.05);
+      box-shadow: 0px 4px 15px rgba(59,130,246,0.5);
+    }
+  </style>
 </head>
-<body style="font-family:Arial;margin:30px;">
-  <h1>Gutenberg Text Cleaner</h1>
-  <input id="url" type="text" style="width:80%" placeholder="https://www.gutenberg.org/files/1342/1342-0.txt">
-  <button onclick="clean()">Clean & Analyze</button>
-  <p id="status"></p>
-  <pre id="output" style="background:#f7f7f7;padding:10px;"></pre>
+
+<body class="font-sans text-gray-900 dark:text-gray-100">
+  <div class="max-w-4xl w-full card shadow-2xl rounded-3xl p-8">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-blue-800 dark:text-blue-400">📖 Gutenberg Text Analyzer</h1>
+      <button id="themeToggle" 
+              class="text-sm px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600">
+        🌙 Toggle Theme
+      </button>
+    </div>
+
+    <!-- Input section -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-6">
+      <input id="url" type="text"
+             placeholder="Enter Project Gutenberg text URL..."
+             class="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-gray-900">
+      <button onclick="clean()"
+              class="bg-blue-600 text-white px-6 py-3 rounded-lg btn-animate">
+        🚀 Clean & Analyze
+      </button>
+    </div>
+
+    <!-- Loading spinner -->
+    <div id="loading" class="hidden flex justify-center items-center mb-4">
+      <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-blue-600"></div>
+    </div>
+
+    <!-- Status -->
+    <p id="status" class="text-center text-gray-700 dark:text-gray-300 mb-4"></p>
+
+    <!-- Results -->
+    <div id="results" class="hidden space-y-10">
+      <!-- Stats Section -->
+      <div>
+        <h2 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-3 text-center">📊 Analysis Results</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          <div class="bg-white dark:bg-blue-950 p-4 rounded-xl shadow text-center">
+            <p class="text-2xl font-bold text-blue-700 dark:text-blue-300" id="charCount">0</p>
+            <p class="text-gray-700 dark:text-gray-300 text-sm">Characters</p>
+          </div>
+          <div class="bg-white dark:bg-blue-950 p-4 rounded-xl shadow text-center">
+            <p class="text-2xl font-bold text-blue-700 dark:text-blue-300" id="wordCount">0</p>
+            <p class="text-gray-700 dark:text-gray-300 text-sm">Words</p>
+          </div>
+          <div class="bg-white dark:bg-blue-950 p-4 rounded-xl shadow text-center">
+            <p class="text-2xl font-bold text-blue-700 dark:text-blue-300" id="sentCount">0</p>
+            <p class="text-gray-700 dark:text-gray-300 text-sm">Sentences</p>
+          </div>
+          <div class="bg-white dark:bg-blue-950 p-4 rounded-xl shadow text-center">
+            <p class="text-2xl font-bold text-blue-700 dark:text-blue-300" id="avgWord">0</p>
+            <p class="text-gray-700 dark:text-gray-300 text-sm">Avg Word Length</p>
+          </div>
+          <div class="bg-white dark:bg-blue-950 p-4 rounded-xl shadow text-center">
+            <p class="text-2xl font-bold text-blue-700 dark:text-blue-300" id="avgSent">0</p>
+            <p class="text-gray-700 dark:text-gray-300 text-sm">Avg Sentence Length</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Section -->
+      <div>
+        <h2 class="text-xl font-semibold text-pink-700 dark:text-pink-400 mb-2">🧾 Summary (First 3 Sentences)</h2>
+        <div class="bg-white dark:bg-yellow-800 border border-pink-200 dark:border-pink-700 rounded-lg p-4 shadow-sm text-yellow-800 dark:text-gray-100" id="summary"></div>
+      </div>
+
+      <!-- Preview Section -->
+      <div>
+        <h2 class="text-xl font-semibold text-purple-700 dark:text-purple-400 mb-2">📝 Cleaned Text (First 500 Characters)</h2>
+        <div class="bg-white dark:bg-green-800 border border-purple-200 dark:border-purple-700 rounded-lg p-4 shadow-sm max-h-64 overflow-y-auto">
+          <pre id="preview" class=" text-gray-800 dark:text-gray-100 font-mono text-sm leading-relaxed"></pre>
+        </div>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">(Scroll to view more)</p>
+      </div>
+    </div>
+
+    <footer class="text-center text-sm text-gray-500 mt-8">
+      Built by <b>Hemanth Sai Reddy Veresi</b> 🌐 | CSE 676 Assignment 3
+    </footer>
+  </div>
+
   <script>
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+    });
+
     async function clean() {
       const url = document.getElementById('url').value.trim();
-      document.getElementById('status').textContent = 'Processing...';
-      const res = await fetch('/api/clean', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({url})
-      });
-      const data = await res.json();
-      if (!data.success) {
-        document.getElementById('status').textContent = 'Error: ' + data.error;
+      const status = document.getElementById('status');
+      const results = document.getElementById('results');
+      const loading = document.getElementById('loading');
+      status.textContent = '';
+      results.classList.add('hidden');
+      loading.classList.remove('hidden');
+
+      if (!url) {
+        loading.classList.add('hidden');
+        status.textContent = '⚠️ Please enter a valid URL.';
+        status.className = 'text-center text-red-500 mb-4';
         return;
       }
-      document.getElementById('status').textContent = 'Done!';
-      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+
+      try {
+        const res = await fetch('/api/clean', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const data = await res.json();
+
+        loading.classList.add('hidden');
+
+        if (!data.success) {
+          status.textContent = '❌ Error: ' + (data.error || 'Unknown error.');
+          status.className = 'text-center text-red-500 mb-4';
+          return;
+        }
+
+        results.classList.remove('hidden');
+        status.textContent = '✅ Text processed successfully!';
+        status.className = 'text-center text-green-600 mb-4';
+
+        // Fill Analysis Results
+        const s = data.statistics;
+        document.getElementById('charCount').textContent = s.total_characters;
+        document.getElementById('wordCount').textContent = s.total_words;
+        document.getElementById('sentCount').textContent = s.total_sentences;
+        document.getElementById('avgWord').textContent = s.avg_word_length;
+        document.getElementById('avgSent').textContent = s.avg_sentence_length;
+
+        // Summary and Cleaned Text Preview
+        document.getElementById('summary').textContent = data.summary;
+        document.getElementById('preview').textContent = data.preview;
+
+      } catch (err) {
+        loading.classList.add('hidden');
+        status.textContent = '❌ Request failed: ' + err.message;
+        status.className = 'text-center text-red-500 mb-4';
+      }
     }
   </script>
 </body>
